@@ -1,3 +1,4 @@
+name: mailhog
 services:
   mailhog:
     container_name: mailhog

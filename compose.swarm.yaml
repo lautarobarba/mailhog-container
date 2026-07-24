@@ -1,0 +1,52 @@
+name: mailhog
+services:
+  mailhog:
+    image: mailhog/mailhog:v1.0.0
+    environment:
+      - TZ=America/Argentina/Ushuaia
+    # ports:
+    #   # smtp server
+    #   - ${MAILHOG_SMTP_SERVER_PORT}:1025
+    #   # web ui
+    #   - ${MAILHOG_WEB_PORT}:8025
+    ports:
+      - target: 1025
+        published: 1025
+        protocol: tcp
+        mode: host
+
+      - target: 8025
+        published: 8025
+        protocol: tcp
+        mode: host
+
+    healthcheck:
+      test: ["CMD", "wget", "-s", "-q", "http://localhost:8025"]
+      interval: 15s
+      retries: 10
+      start_period: 120s
+      timeout: 5s
+    networks:
+      - mailhog_network
+      - traefik_network
+    deploy:
+      replicas: 1
+      restart_policy:
+        condition: on-failure
+        delay: 5s
+        max_attempts: 3
+        window: 120s
+      labels:
+        - traefik.enable=true
+        - traefik.docker.network=traefik_network
+        - traefik.http.routers.mailhog.service=mailhog
+        - traefik.http.routers.mailhog.rule=Host(`mailhog.stj.local`)
+        - traefik.http.routers.mailhog.entrypoints=websecure
+        - traefik.http.routers.mailhog.tls=true
+        - traefik.http.services.mailhog.loadbalancer.server.port=8025
+
+networks:
+  mailhog_network:
+    external: true
+  traefik_network:
+    external: true

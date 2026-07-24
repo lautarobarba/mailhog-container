@@ -62,3 +62,20 @@ curl http://localhost:8025/api/v1/messages/<id>
 ```bash
 docker compose down
 ```
+
+## Deploy en swarm - Setup
+
+### 1. Crear la red overlay
+
+```bash
+docker network create \
+  --driver=overlay \
+  --attachable \
+  traefik_network
+```
+
+### 1. Crear la red overlay
+
+```bash
+docker stack deploy -c compose.yaml mailhog
+```
